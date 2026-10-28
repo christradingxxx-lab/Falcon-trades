@@ -25,15 +25,14 @@ Anything not explicitly marked Public is treated as private.
 3. Unzip `falcon-trades.zip` on your computer, open the folder, select **everything inside it** and drag it into the upload area.
 4. Check that `.pages.yml` appears in the file list (it starts with a dot, so some computers hide it). Then click **Commit changes**.
 
-### 3. Publish it free on Cloudflare Pages
+### 3. Publish it free on Cloudflare
 1. Create a free account at dash.cloudflare.com.
-2. Go to **Workers & Pages → Create → Pages → Connect to Git**, connect your GitHub account, and pick `falcon-trades`.
-3. Build settings:
-   - Framework preset: **Astro**
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-4. Click **Save and Deploy**. After a minute or two your site is live at `https://<project-name>.pages.dev`.
-5. Open `astro.config.mjs` in GitHub and set `site:` to that address (this makes link previews on social media work).
+2. In the left sidebar go to **Build → Compute** (older guides call it "Workers & Pages") and click **Create application**.
+3. Connect GitHub (choose *Only select repositories* → `falcon-trades`) and select the repository.
+4. Settings: build command `npm run build`, deploy command `npx wrangler deploy` (the defaults are fine).
+   The included `wrangler.jsonc` tells Cloudflare to publish the `dist` folder as a static site.
+5. Deploy. Your site goes live at `https://falcon-trades.<your-account>.workers.dev`.
+6. Open `astro.config.mjs` in GitHub and set `site:` to that address (this makes link previews on social media work).
 
 ### 4. Set up your Journal Desk
 1. Go to app.pagescms.org and **Sign in with GitHub**.

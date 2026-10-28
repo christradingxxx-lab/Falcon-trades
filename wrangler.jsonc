@@ -1,0 +1,10 @@
+{
+  // Cloudflare settings: serve the built website (the dist folder) as a static site.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "falcon-trades",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
