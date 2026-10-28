@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPlaybooks, tone } from '../../lib/content';
+const items = await getPlaybooks();
+const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+---
+<Base title="Playbooks" description="The trading models and setups behind every trade, written up chapter by chapter.">
+  <section class="container stack" style="padding:80px 24px 48px;gap:18px">
+    <p class="eyebrow">The playbooks</p>
+    <div class="rule" aria-hidden="true"></div>
+    <h1 class="h1">The rules, <span class="it gold">in writing.</span></h1>
+    <p class="lead">Each playbook is one model: the context it needs, the trigger, the stop, the target, and the reasons it can fail.</p>
+  </section>
+  <section class="container" style="padding-bottom:88px">
+    {items.length ? (
+      <div class="grid-3">
+        {items.map((p, i) => (
+          <article class={tone(i)}>
+            <span style="font-family:var(--serif);font-size:40px;line-height:1;color:var(--gold)">{numerals[i] ?? i + 1}</span>
+            {p.data.market && <p class="mono gold" style="margin:0">{p.data.market}</p>}
+            <h2 class="card-title"><a href={`/playbooks/${p.id}/`}>{p.data.title}</a></h2>
+            {p.data.summary && <p class="body-text">{p.data.summary}</p>}
+            <a class="link-arrow card-foot" href={`/playbooks/${p.id}/`}>Read the playbook →</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">The first playbooks are being written.</div>
+    )}
+  </section>
+</Base>

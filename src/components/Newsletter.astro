@@ -1,0 +1,15 @@
+---
+import settings from '../data/settings.json';
+// Shows only when a newsletter link is set (for example a Substack, Beehiiv or Buttondown page).
+---
+{settings.newsletterUrl && (
+  <section class="container section-sm">
+    <div class="card card--khaki" style="padding:48px;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px">
+      <div style="flex:1 1 360px;min-width:0" class="stack-sm">
+        <h2 class="h2" style="font-size:40px">{settings.newsletterTitle}</h2>
+        <p class="body-text">{settings.newsletterText}</p>
+      </div>
+      <a class="btn btn-gold" href={settings.newsletterUrl} target="_blank" rel="noopener">Subscribe</a>
+    </div>
+  </section>
+)}

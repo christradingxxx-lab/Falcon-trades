@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getTools } from '../../lib/content';
+const items = await getTools();
+---
+<Base title="Tools" description="Trading tools built for my own process: NinjaTrader strategies, journal templates and analytics.">
+  <section class="container stack" style="padding:80px 24px 48px;gap:18px">
+    <p class="eyebrow">Trading tools</p>
+    <div class="rule" aria-hidden="true"></div>
+    <h1 class="h1">Tools I actually <span class="it gold">trade with.</span></h1>
+    <p class="lead">Built for my own process first, then packaged for yours. Checkout and instant download are handled securely by the store.</p>
+  </section>
+  <section class="container" style="padding-bottom:88px">
+    {items.length ? (
+      <div class="grid-3">
+        {items.map((t, i) => (
+          <article class={i % 3 === 1 ? 'card card--brown' : 'card'}>
+            {t.data.image && <img src={t.data.image} alt="" class="thumb" />}
+            {t.data.platform && <p class="mono gold" style="margin:0">{t.data.platform}{t.data.badge && <span style="color:var(--khaki)"> · {t.data.badge}</span>}</p>}
+            <h2 class="card-title"><a href={`/tools/${t.id}/`}>{t.data.name}</a></h2>
+            {t.data.tagline && <p class="body-text">{t.data.tagline}</p>}
+            {t.data.features.length > 0 && (
+              <ul class="body-text" style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:6px">
+                {t.data.features.map((f) => <li>{f}</li>)}
+              </ul>
+            )}
+            <div class="card-foot between" style="align-items:center;padding-top:16px;border-top:1px solid var(--olive-line)">
+              <span style="font-family:var(--serif);font-size:26px;color:var(--gold)">{t.data.price || 'Coming soon'}</span>
+              <a class="btn btn-gold" href={`/tools/${t.id}/`}>Details</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">Tools are coming soon.</div>
+    )}
+  </section>
+</Base>

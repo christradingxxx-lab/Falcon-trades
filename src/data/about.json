@@ -1,0 +1,40 @@
+{
+  "name": "Falcon",
+  "portrait": "",
+  "headline": "Site manager by day, futures trader by discipline, and a husband and father working toward a life of freedom back home.",
+  "intro": "I'm a Filipino from Lapu-Lapu, Cebu, working in Singapore as a site manager in civil engineering. I trade NQ and ES futures with a mechanical, rules-based system, and this site is where I keep the record: every journal entry, every playbook, every tool I build to trade better.",
+  "from": "Lapu-Lapu, Cebu",
+  "basedIn": "Singapore",
+  "trades": "NQ · ES futures",
+  "tradingSince": "",
+  "chapters": [
+    {
+      "label": "Where it started",
+      "title": "Lapu-Lapu, Cebu",
+      "text": "Write about your childhood, your family and what shaped you: where you grew up, what you studied, and what first pushed you to work hard."
+    },
+    {
+      "label": "Building abroad",
+      "title": "An OFW in Singapore",
+      "text": "Today I manage civil and infrastructure project sites: programmes, method statements, risk assessments and keeping several sites moving at once. The job taught me that big outcomes come from small steps done right, every day. That's the same way I approach the markets."
+    },
+    {
+      "label": "The trading desk",
+      "title": "From discretion to a system",
+      "text": "Write how you started trading and the early lessons. Now I trade NQ and ES with defined setups, journal every session, and automate parts of my process in NinjaTrader 8."
+    },
+    {
+      "label": "The mission",
+      "title": "Operation Freedom",
+      "text": "The goal is to return home to the Philippines for good: to be a present father, build a self-sustaining life with my wife, and make trading a real source of income alongside small businesses. Faith is at the centre of it. This website is the public record of that journey."
+    }
+  ],
+  "motto": "",
+  "mottoSource": "",
+  "principles": [
+    { "title": "Discipline", "text": "Follow the rules, especially when it's hard. No setup, no trade." },
+    { "title": "Process", "text": "Judge the execution, not the outcome. The journal keeps me honest." },
+    { "title": "Faith", "text": "Purpose bigger than the P&L. Gratitude in wins, humility in losses." },
+    { "title": "Family", "text": "Every trade serves one goal: time and freedom with the people who matter." }
+  ]
+}

@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import settings from '../data/settings.json';
+import { getVideos, formatDate, youtubeId } from '../lib/content';
+const videos = (await getVideos()).map((v) => ({ ...v, vid: youtubeId(v.data.url) }));
+const topics = [...new Set(videos.map((v) => v.data.topic))];
+const featured = videos[0];
+---
+<Base title="Videos" description="Session recaps, setup breakdowns and build logs from the YouTube channel.">
+  <section class="container stack" style="padding:80px 24px 40px;gap:18px">
+    <p class="eyebrow">Videos</p>
+    <div class="rule" aria-hidden="true"></div>
+    <h1 class="h1">Watch the playbook <span class="it gold">play out.</span></h1>
+    <p class="lead">Session recaps, setup breakdowns and build logs, organised by topic.</p>
+    {settings.youtube && <div><a class="btn btn-gold" href={settings.youtube} target="_blank" rel="noopener">Subscribe on YouTube</a></div>}
+  </section>
+
+  {featured?.vid && (
+    <section class="container" style="padding-bottom:48px">
+      <div class="video-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${featured.vid}`} title={featured.data.title} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <h2 class="h3" style="margin-top:16px">{featured.data.title}</h2>
+    </section>
+  )}
+
+  {topics.length > 1 && (
+    <section class="container" style="padding-bottom:28px">
+      <div class="filter-row" role="group" aria-label="Filter by topic">
+        <span class="filter-label">TOPIC</span>
+        <button class="filter" type="button" data-topic="all" aria-pressed="true">All</button>
+        {topics.map((t) => <button class="filter" type="button" data-topic={t} aria-pressed="false">{t}</button>)}
+      </div>
+    </section>
+  )}
+
+  <section class="container" style="padding-bottom:88px">
+    {videos.length ? (
+      <div class="grid-3" id="videos">
+        {videos.map((v, i) => (
+          <article class={i % 2 ? 'card card--brown' : 'card'} data-topic={v.data.topic} style="padding:20px">
+            <a href={v.data.url} target="_blank" rel="noopener" class="stack-sm" style="text-decoration:none;color:inherit">
+              {v.vid ? <img class="thumb" src={`https://i.ytimg.com/vi/${v.vid}/hqdefault.jpg`} alt="" loading="lazy" /> : <div class="thumb" style="background:var(--bg-deep)"></div>}
+              <div class="meta"><time datetime={v.data.date.toISOString()}>{formatDate(v.data.date)}</time><span class="chip">{v.data.topic}</span></div>
+              <h2 class="card-title" style="font-size:22px">{v.data.title}</h2>
+            </a>
+            {v.data.description && <p class="body-text" style="font-size:15px">{v.data.description}</p>}
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">Videos are coming soon.</div>
+    )}
+  </section>
+
+  <script>
+    const btns = document.querySelectorAll<HTMLButtonElement>('[data-topic].filter');
+    const cards = document.querySelectorAll<HTMLElement>('#videos article');
+    btns.forEach((b) => b.addEventListener('click', () => {
+      const t = b.dataset.topic;
+      btns.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+      cards.forEach((c) => { c.hidden = !(t === 'all' || c.dataset.topic === t); });
+    }));
+  </script>
+</Base>

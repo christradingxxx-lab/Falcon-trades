@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getResearch, formatDate, tone } from '../../lib/content';
+const items = await getResearch();
+---
+<Base title="Research" description="Studies and papers on market structure, order flow and trading setups.">
+  <section class="container stack" style="padding:80px 24px 48px;gap:18px">
+    <p class="eyebrow">Research</p>
+    <div class="rule" aria-hidden="true"></div>
+    <h1 class="h1">Studies from <span class="it gold">the desk.</span></h1>
+    <p class="lead">Longer pieces on order flow, market behaviour and setup statistics, with downloadable papers where available.</p>
+  </section>
+  <section class="container stack" style="padding-bottom:88px">
+    {items.length ? items.map((r, i) => (
+      <article class={tone(i)} style="flex-direction:row;flex-wrap:wrap;gap:28px;align-items:center">
+        {r.data.cover && <img src={r.data.cover} alt="" style="flex:0 1 240px;min-width:0;border-radius:2px;border:1px solid var(--brown-line)" />}
+        <div style="flex:1 1 380px;min-width:0" class="stack-sm">
+          <div class="meta"><time datetime={r.data.date.toISOString()}>{formatDate(r.data.date)}</time>{r.data.pdf && <span class="tag">PDF</span>}</div>
+          <h2 class="card-title"><a href={`/research/${r.id}/`}>{r.data.title}</a></h2>
+          {r.data.summary && <p class="body-text">{r.data.summary}</p>}
+          <div class="row">
+            <a class="link-arrow" href={`/research/${r.id}/`}>Read →</a>
+            {r.data.pdf && <a class="btn btn-ghost" href={r.data.pdf} download>Download PDF</a>}
+          </div>
+        </div>
+      </article>
+    )) : (
+      <div class="empty">The first research paper is on its way.</div>
+    )}
+  </section>
+</Base>

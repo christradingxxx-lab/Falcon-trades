@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+import Socials from '../components/Socials.astro';
+import about from '../data/about.json';
+import settings from '../data/settings.json';
+const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+const facts = [
+  ['From', about.from], ['Based in', about.basedIn], ['Trades', about.trades], ['Trading since', about.tradingSince],
+].filter(([, v]) => v);
+const hasSocials = [settings.youtube, settings.facebook, settings.instagram, settings.tiktok, settings.x, settings.email].some(Boolean);
+---
+<Base title="About" description={about.headline} image={about.portrait || undefined}>
+  <section class="container" style="padding:88px 24px 72px;display:flex;flex-wrap:wrap;align-items:center;gap:64px">
+    <div style="flex:1 1 320px;min-width:0;display:flex;justify-content:center">
+      <div style="width:100%;max-width:400px;aspect-ratio:4/5;border:1px solid var(--gold);padding:12px">
+        {about.portrait ? (
+          <img src={about.portrait} alt={`Portrait of ${about.name}`} style="width:100%;height:100%;object-fit:cover" />
+        ) : (
+          <div style="width:100%;height:100%;background:var(--brown);border:1px solid var(--brown-line);display:flex;align-items:center;justify-content:center">
+            <span class="crest" style="width:96px;height:96px;font-size:52px" aria-hidden="true">{about.name.charAt(0)}</span>
+          </div>
+        )}
+      </div>
+    </div>
+    <div style="flex:1 1 520px;min-width:0" class="stack">
+      <p class="eyebrow">About the trader</p>
+      <div class="rule" aria-hidden="true"></div>
+      <h1 class="h1">I'm <span class="it gold">{about.name}.</span></h1>
+      <p style="margin:0;font-family:var(--serif);font-size:26px;line-height:1.45;color:#E2DBC6">{about.headline}</p>
+      <p class="body-text">{about.intro}</p>
+      <div class="row" style="padding-top:6px">
+        <a class="btn btn-gold" href="/journal/">Read my journal</a>
+        {hasSocials && <a class="btn btn-ghost" href="#connect">Get in touch</a>}
+      </div>
+    </div>
+  </section>
+
+  {facts.length > 0 && (
+    <section class="band" aria-label="At a glance">
+      <dl class="container grid-4" style="padding:36px 24px;margin:0 auto">
+        {facts.map(([k, v]) => (
+          <div><dt class="eyebrow" style="font-size:14px;letter-spacing:3px;color:var(--muted)">{k}</dt><dd style="margin:0;font-family:var(--serif);font-size:26px;color:var(--gold)">{v}</dd></div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  {about.chapters.length > 0 && (
+    <section class="narrow section stack" style="gap:48px">
+      <div class="stack-sm center" style="display:flex;flex-direction:column">
+        <p class="eyebrow">My story</p>
+        <h2 class="h2">The road <span class="it gold">so far</span></h2>
+      </div>
+      <ol style="list-style:none;margin:0;padding:0 0 0 36px;border-left:1px solid var(--gold);display:flex;flex-direction:column;gap:48px">
+        {about.chapters.map((c, i) => (
+          <li style="position:relative" class="stack-sm">
+            <span aria-hidden="true" style={`position:absolute;left:-43px;top:10px;width:12px;height:12px;border:1px solid var(--gold);transform:rotate(45deg);background:${i === about.chapters.length - 1 ? 'var(--gold)' : 'var(--bg)'}`}></span>
+            <p class="mono gold" style="margin:0;font-size:13px">{numerals[i]} · {c.label}</p>
+            <h3 class="h3" style="font-size:32px">{c.title}</h3>
+            <p class="body-text" style="font-size:17px">{c.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  {about.motto && (
+    <section class="container" style="max-width:1000px;padding:24px 24px 64px">
+      <figure style="margin:0;padding:56px 32px;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);text-align:center" class="stack-sm">
+        <blockquote style="margin:0;font-family:var(--serif);font-style:italic;font-size:clamp(28px,4vw,40px);line-height:1.3;color:var(--head)">“{about.motto}”</blockquote>
+        {about.mottoSource && <figcaption class="eyebrow" style="color:var(--gold)">— {about.mottoSource}</figcaption>}
+      </figure>
+    </section>
+  )}
+
+  {about.principles.length > 0 && (
+    <section class="container section-sm stack" style="gap:36px">
+      <div class="stack-sm" style="text-align:center;align-items:center;display:flex;flex-direction:column">
+        <p class="eyebrow">What I stand for</p>
+        <h2 class="h2">The <span class="it gold">principles</span></h2>
+      </div>
+      <div class="grid-4">
+        {about.principles.map((p, i) => (
+          <div class={i % 2 ? 'card card--brown' : 'card'}>
+            <span style="font-family:var(--serif);font-size:40px;line-height:1;color:var(--gold)" aria-hidden="true">{numerals[i]}</span>
+            <h3 class="h3" style="font-size:26px">{p.title}</h3>
+            <p class="body-text" style="font-size:15px">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {hasSocials && (
+    <section id="connect" class="container section-sm" style="padding-bottom:88px">
+      <div class="card card--khaki" style="padding:48px;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px">
+        <div style="flex:1 1 360px;min-width:0" class="stack-sm">
+          <h2 class="h2" style="font-size:40px">Let's <span class="it gold">connect</span></h2>
+          <p class="body-text">Questions about my tools, collaborations, or just talking trading.</p>
+        </div>
+        <div style="flex:1 1 380px;min-width:0"><Socials /></div>
+      </div>
+    </section>
+  )}
+</Base>

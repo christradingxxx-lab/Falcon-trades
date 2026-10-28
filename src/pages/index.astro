@@ -1,0 +1,150 @@
+---
+import Base from '../layouts/Base.astro';
+import JournalCard from '../components/JournalCard.astro';
+import Newsletter from '../components/Newsletter.astro';
+import settings from '../data/settings.json';
+import { getPublicJournal, getTools, getVideos, getPlaybooks, TYPE_LABELS, formatDate, marketsLabel, youtubeId, tone } from '../lib/content';
+
+const journal = await getPublicJournal();
+const tools = (await getTools()).slice(0, 3);
+const videos = await getVideos();
+const playbooks = await getPlaybooks();
+const latest = journal[0];
+const latestVideo = videos[0];
+const latestVideoId = youtubeId(latestVideo?.data.url);
+
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+const weekly = journal.filter((e) => e.data.type === 'weekly').length;
+const monthly = journal.filter((e) => e.data.type === 'monthly' || e.data.type === 'quarterly').length;
+// Only show figures that have something to count, so the band never shows a row of zeros.
+const stats = [
+  { n: journal.length, label: plural(journal.length, 'journal entry', 'journal entries') },
+  { n: weekly, label: plural(weekly, 'weekly review', 'weekly reviews') },
+  { n: monthly, label: plural(monthly, 'monthly or quarterly review', 'monthly & quarterly reviews') },
+  { n: playbooks.length, label: plural(playbooks.length, 'playbook', 'playbooks') },
+].filter((s) => s.n > 0);
+
+const candles = [
+  [30, 150, 185, 158, 20, 0], [58, 140, 178, 150, 18, 0], [86, 128, 170, 135, 25, 1], [114, 120, 150, 124, 18, 1],
+  [142, 112, 145, 118, 16, 0], [170, 96, 138, 102, 28, 1], [198, 84, 112, 88, 18, 1], [226, 80, 110, 86, 14, 0],
+  [254, 66, 104, 72, 24, 1], [282, 54, 84, 58, 20, 1], [310, 52, 80, 58, 14, 0], [338, 38, 74, 44, 24, 1],
+  [366, 30, 58, 34, 18, 1], [394, 26, 52, 30, 16, 1],
+];
+---
+<Base>
+  <section class="container" style="padding:96px 24px 80px;display:flex;flex-wrap:wrap;align-items:center;gap:64px">
+    <div style="flex:1 1 480px;min-width:0" class="stack">
+      <p class="eyebrow">{settings.heroEyebrow}</p>
+      <div class="rule" aria-hidden="true"></div>
+      <h1 class="h1">{settings.heroTitle}<br /><span class="it gold">{settings.heroTitleAccent}</span></h1>
+      <p class="lead">{settings.heroText}</p>
+      <div class="row" style="padding-top:8px">
+        <a class="btn btn-gold" href="/journal/">Read the journal</a>
+        <a class="btn btn-ghost" href="/tools/">Browse trading tools</a>
+      </div>
+    </div>
+
+    <div style="flex:1 1 420px;min-width:0;border:1px solid var(--brown-line);border-radius:4px;background:var(--brown);overflow:hidden">
+      <div class="between mono" style="padding:16px 22px;border-bottom:1px solid var(--brown-line);color:var(--muted);align-items:center">
+        <span>NQ · NY SESSION</span>
+        <span style="color:var(--khaki)">● journal</span>
+      </div>
+      <svg viewBox="0 0 440 220" style="display:block;width:100%;height:auto" aria-hidden="true">
+        <g stroke="#45372C" stroke-width="1"><line x1="0" y1="55" x2="440" y2="55" /><line x1="0" y1="110" x2="440" y2="110" /><line x1="0" y1="165" x2="440" y2="165" /></g>
+        {candles.map(([x, hi, lo, top, h, up]) => (
+          <g>
+            <line x1={x} y1={hi} x2={x} y2={lo} stroke={up ? '#CDBF94' : '#94654E'} stroke-width="2" />
+            <rect x={x - 6} y={top} width="12" height={h} rx="2" fill={up ? '#CDBF94' : '#94654E'} />
+          </g>
+        ))}
+        <polyline points="30,170 86,150 142,128 198,104 254,88 310,68 366,48 410,40" fill="none" stroke="#C9A96E" stroke-width="2" stroke-dasharray="6 5" />
+      </svg>
+      <div style="border-top:1px solid var(--brown-line);padding:18px 22px" class="stack-sm">
+        {latest ? (
+          <>
+            <div class="meta"><span>Latest entry</span><time datetime={latest.data.date.toISOString()}>{formatDate(latest.data.date)}</time><span>{TYPE_LABELS[latest.data.type]}</span></div>
+            <a href={`/journal/${latest.id}/`} style="font-family:var(--serif);font-size:22px;color:var(--head);text-decoration:none">{latest.data.title} <span class="gold">→</span></a>
+          </>
+        ) : (
+          <p class="mono muted" style="margin:0">The first journal entry is coming soon.</p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {stats.length > 1 && (<section class="band" aria-label="Journal at a glance">
+    <div class="container grid-4" style="padding:40px 24px">
+      {stats.map((s) => (
+        <div><div class="stat-num">{s.n}</div><div class="stat-label">{s.label}</div></div>
+      ))}
+    </div>
+  </section>)}
+
+  <section class="container section stack" style="gap:40px">
+    <div class="between">
+      <div class="stack-sm">
+        <p class="eyebrow">The journal</p>
+        <h2 class="h2">Latest <span class="it gold">entries</span></h2>
+      </div>
+      <a class="link-arrow" href="/journal/">View all entries →</a>
+    </div>
+    {journal.length ? (
+      <div class="grid-3">
+        {journal.slice(0, 3).map((e, i) => <JournalCard entry={e} tone={tone(i)} />)}
+      </div>
+    ) : (
+      <div class="empty">The first public entries are on their way.</div>
+    )}
+  </section>
+
+  {tools.length > 0 && (
+    <section class="container section stack" style="gap:40px;padding-top:24px">
+      <div class="between">
+        <div class="stack-sm">
+          <p class="eyebrow">Trading tools</p>
+          <h2 class="h2">Tools I actually <span class="it gold">trade</span> with</h2>
+          <p class="body-text" style="max-width:600px">Built for my own process first, then packaged for yours.</p>
+        </div>
+        <a class="link-arrow" href="/tools/">All tools →</a>
+      </div>
+      <div class="grid-3">
+        {tools.map((t, i) => (
+          <div class={i === 1 ? 'card card--brown' : 'card'}>
+            {t.data.platform && <p class="mono gold" style="margin:0">{t.data.platform}{t.data.badge && <span style="color:var(--khaki)"> · {t.data.badge}</span>}</p>}
+            <h3 class="card-title"><a href={`/tools/${t.id}/`}>{t.data.name}</a></h3>
+            {t.data.tagline && <p class="body-text">{t.data.tagline}</p>}
+            <div class="card-foot between" style="align-items:center;padding-top:16px;border-top:1px solid var(--olive-line)">
+              <span style="font-family:var(--serif);font-size:26px;color:var(--gold)">{t.data.price || 'Coming soon'}</span>
+              <a class="btn btn-gold" href={`/tools/${t.id}/`}>Details</a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="container section" style="display:flex;flex-wrap:wrap;align-items:center;gap:56px;padding-top:24px">
+    <div style="flex:1 1 420px;min-width:0" class="stack">
+      <p class="eyebrow">On YouTube</p>
+      <h2 class="h2">Watch the playbook <span class="it gold">play out</span></h2>
+      <p class="body-text">Session recaps, setup breakdowns and build logs. Every video links back to its journal entry so you can see the full context.</p>
+      <div class="row">
+        <a class="btn btn-ghost" href="/videos/">All videos</a>
+        {settings.youtube && <a class="btn btn-gold" href={settings.youtube} target="_blank" rel="noopener">Subscribe on YouTube</a>}
+      </div>
+    </div>
+    <div style="flex:1 1 480px;min-width:0">
+      {latestVideoId ? (
+        <div class="video-frame">
+          <iframe src={`https://www.youtube-nocookie.com/embed/${latestVideoId}`} title={latestVideo!.data.title} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      ) : (
+        <div class="video-frame" style="display:flex;align-items:center;justify-content:center">
+          <span class="mono muted">Videos coming soon</span>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Newsletter />
+</Base>

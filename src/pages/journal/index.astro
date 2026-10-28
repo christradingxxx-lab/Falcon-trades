@@ -1,0 +1,122 @@
+---
+import Base from '../../layouts/Base.astro';
+import JournalCard from '../../components/JournalCard.astro';
+import Newsletter from '../../components/Newsletter.astro';
+import { getPublicJournal, TYPE_LABELS, formatDate, marketsLabel, monthKey, tone } from '../../lib/content';
+
+const entries = await getPublicJournal();
+const featured = entries.find((e) => e.data.type === 'monthly' || e.data.type === 'quarterly');
+const markets = [...new Set(entries.flatMap((e) => e.data.markets))].sort();
+const types = ['daily', 'weekly', 'monthly', 'quarterly'].filter((t) => entries.some((e) => e.data.type === t));
+
+const archive = new Map<string, number>();
+for (const e of entries) archive.set(monthKey(e.data.date), (archive.get(monthKey(e.data.date)) ?? 0) + 1);
+---
+<Base title="Journal" description="Daily logs plus weekly, monthly and quarterly reviews, by market.">
+  <section class="container stack" style="padding:80px 24px 40px;gap:18px">
+    <p class="eyebrow">The trading journal</p>
+    <div class="rule" aria-hidden="true"></div>
+    <h1 class="h1">Every session, <span class="it gold">written down.</span></h1>
+    <p class="lead">Daily logs, weekly and monthly reviews, broken down by market. The wins, the mistakes and the lessons in between.</p>
+  </section>
+
+  {featured && (
+    <section class="container" style="padding-bottom:48px" aria-label="Featured review">
+      <a href={`/journal/${featured.id}/`} class="card card--brown" style="padding:44px;text-decoration:none;color:inherit;gap:14px;border-color:#5A4636">
+        <div class="meta">
+          <span class="tag tag-solid">Latest {TYPE_LABELS[featured.data.type]}</span>
+          <time datetime={featured.data.date.toISOString()}>{formatDate(featured.data.date)}</time>
+          {featured.data.markets.length > 0 && <span class="chip">{marketsLabel(featured.data.markets)}</span>}
+        </div>
+        <h2 class="h2" style="font-size:44px">{featured.data.title}</h2>
+        {featured.data.excerpt && <p class="body-text">{featured.data.excerpt}</p>}
+        <span class="gold" style="font-weight:500">Read the review →</span>
+      </a>
+    </section>
+  )}
+
+  {entries.length > 0 && (
+    <section class="container stack-sm" style="padding-bottom:32px" aria-label="Filters">
+      <div class="filter-row" role="group" aria-label="Filter by type">
+        <span class="filter-label">TYPE</span>
+        <button class="filter" type="button" data-group="type" data-value="all" aria-pressed="true">All entries</button>
+        {types.map((t) => <button class="filter" type="button" data-group="type" data-value={t} aria-pressed="false">{TYPE_LABELS[t]}</button>)}
+      </div>
+      {markets.length > 1 && (
+        <div class="filter-row" role="group" aria-label="Filter by market">
+          <span class="filter-label">MARKET</span>
+          <button class="filter khaki" type="button" data-group="market" data-value="all" aria-pressed="true">All markets</button>
+          {markets.map((m) => <button class="filter khaki" type="button" data-group="market" data-value={m} aria-pressed="false">{m}</button>)}
+        </div>
+      )}
+    </section>
+  )}
+
+  <section class="container" style="padding-bottom:88px;display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+    <div style="flex:999 1 560px;min-width:0" class="stack">
+      {entries.length ? (
+        <>
+          <p class="muted" style="margin:0;font-size:14px" aria-live="polite">Entries shown: <span id="count">{entries.length}</span></p>
+          <div class="stack" id="entries">
+            {entries.map((e, i) => <JournalCard entry={e} tone={tone(i)} headingLevel="h2" />)}
+          </div>
+          <div class="empty" id="no-results" hidden>No entries match this filter yet.</div>
+        </>
+      ) : (
+        <div class="empty">The first public entries are on their way.</div>
+      )}
+    </div>
+
+    <aside style="flex:1 1 300px;min-width:0" class="stack">
+      <div class="card">
+        <h2 class="h3" style="font-size:24px">The review <span class="it gold">cadence</span></h2>
+        <dl style="margin:0;display:grid;grid-template-columns:1fr auto;gap:10px 16px;font-size:15px">
+          <dt>Daily log</dt><dd class="muted" style="margin:0">every session</dd>
+          <dt>Weekly review</dt><dd class="muted" style="margin:0">every weekend</dd>
+          <dt>Monthly review</dt><dd class="muted" style="margin:0">first weekend</dd>
+          <dt>Quarterly review</dt><dd class="muted" style="margin:0">end of quarter</dd>
+        </dl>
+      </div>
+      {archive.size > 0 && (
+        <div class="card card--brown">
+          <h2 class="h3" style="font-size:24px">Archive</h2>
+          <ul style="list-style:none;margin:0;padding:0">
+            {[...archive].map(([m, n]) => (
+              <li class="between" style="align-items:center;min-height:40px;border-bottom:1px solid var(--brown-line)"><span>{m}</span><span class="gold">{n}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </aside>
+  </section>
+
+  <Newsletter />
+
+  <script>
+    const state: Record<string, string> = { type: 'all', market: 'all' };
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.filter');
+    const cards = document.querySelectorAll<HTMLElement>('#entries article');
+    const count = document.getElementById('count');
+    const none = document.getElementById('no-results');
+    function apply() {
+      let shown = 0;
+      cards.forEach((c) => {
+        const okType = state.type === 'all' || c.dataset.type === state.type;
+        const okMarket = state.market === 'all' || (c.dataset.markets || '').split(',').includes(state.market);
+        const show = okType && okMarket;
+        c.hidden = !show;
+        if (show) shown++;
+      });
+      if (count) count.textContent = String(shown);
+      if (none) none.hidden = shown > 0;
+    }
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        const g = b.dataset.group!;
+        state[g] = b.dataset.value!;
+        buttons.forEach((o) => { if (o.dataset.group === g) o.setAttribute('aria-pressed', String(o === b)); });
+        apply();
+      })
+    );
+  </script>
+</Base>

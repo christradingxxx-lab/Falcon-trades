@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { TYPE_LABELS, formatDate, marketsLabel } from '../lib/content';
+
+interface Props {
+  entry: CollectionEntry<'journal'>;
+  tone?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+const { entry, tone = 'card', headingLevel = 'h3' } = Astro.props;
+const d = entry.data;
+const H = headingLevel;
+const href = `/journal/${entry.id}/`;
+---
+<article class={tone} data-type={d.type} data-markets={d.markets.join(',')}>
+  <div class="meta">
+    <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>
+    <span class="tag">{TYPE_LABELS[d.type]}</span>
+    {d.markets.length > 0 && <span class="chip">{marketsLabel(d.markets)}</span>}
+  </div>
+  <H class="card-title"><a href={href}>{d.title}</a></H>
+  {d.excerpt && <p class="body-text">{d.excerpt}</p>}
+  <a class="link-arrow card-foot" href={href} aria-label={`Read entry: ${d.title}`}>Read entry →</a>
+</article>

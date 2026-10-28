@@ -1,0 +1,72 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getPublicJournal, TYPE_LABELS, formatDate, marketsLabel, youtubeId } from '../../lib/content';
+
+export async function getStaticPaths() {
+  // Private entries are excluded here, so no page is ever built for them.
+  const entries = await getPublicJournal();
+  return entries.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, newer: entries[i - 1], older: entries[i + 1] },
+  }));
+}
+
+const { entry, newer, older } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const vid = youtubeId(d.video);
+const details = [
+  ['Setup', d.setup], ['Entry', d.entry], ['Exit', d.exit], ['Result', d.result],
+].filter(([, v]) => v);
+---
+<Base title={d.title} description={d.excerpt} image={d.cover}>
+  <article>
+    <header class="narrow stack" style="padding:72px 24px 32px;gap:18px">
+      <a href="/journal/" class="link-arrow" style="min-height:auto">← Journal</a>
+      <div class="meta">
+        <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>
+        <span class="tag">{TYPE_LABELS[d.type]}</span>
+        {d.markets.length > 0 && <span class="chip">{marketsLabel(d.markets)}</span>}
+      </div>
+      <h1 class="h1" style="font-size:clamp(40px,6vw,64px)">{d.title}</h1>
+      {d.excerpt && <p class="lead">{d.excerpt}</p>}
+      <div class="rule" aria-hidden="true"></div>
+    </header>
+
+    {d.cover && (
+      <div class="narrow" style="padding-bottom:32px"><img src={d.cover} alt="" style="border:1px solid var(--brown-line);border-radius:4px" /></div>
+    )}
+
+    {(details.length > 0 || d.mindset) && (
+      <div class="narrow" style="padding-bottom:32px">
+        <div class="card card--brown">
+          <h2 class="eyebrow" style="color:var(--gold)">Trade details</h2>
+          {details.length > 0 && (
+            <dl class="grid-4" style="margin:0;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+              {details.map(([k, v]) => (
+                <div><dt class="label">{k}</dt><dd style="margin:0;font-family:var(--serif);font-size:22px;color:var(--head)">{v}</dd></div>
+              ))}
+            </dl>
+          )}
+          {d.mindset && <p class="body-text"><span class="label">Mindset and mistakes: </span>{d.mindset}</p>}
+        </div>
+      </div>
+    )}
+
+    <div class="narrow prose" style="padding-bottom:40px">
+      <Content />
+    </div>
+
+    {vid && (
+      <div class="narrow" style="padding-bottom:40px">
+        <div class="video-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${vid}`} title={`Video: ${d.title}`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      </div>
+    )}
+
+    <nav class="narrow between" aria-label="More entries" style="padding:32px 24px 64px;border-top:1px solid var(--gold-line)">
+      {older ? <a class="link-arrow" href={`/journal/${older.id}/`}>← {older.data.title}</a> : <span></span>}
+      {newer && <a class="link-arrow" href={`/journal/${newer.id}/`}>{newer.data.title} →</a>}
+    </nav>
+  </article>
+</Base>
